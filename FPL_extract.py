@@ -45,6 +45,18 @@ def Createfigure(title):
     fig.suptitle(title)
     return fig, ax1, ax2, ax3
 
+def Per90(dataframe):
+    dataframe["C/90"] = (dataframe["creativity"]/dataframe["minutes"])*90
+    dataframe["I/90"] = (dataframe["influence"]/dataframe["minutes"])*90
+    dataframe["T/90"] = (dataframe["threat"]/dataframe["minutes"])*90
+    return dataframe
+
+def PredictedValuesColumns(dataframe, creativity, influence, threat):
+    dataframe["C_predicted"] = creativity
+    dataframe["I_predicted"] = influence
+    dataframe["T_predicted"] = threat
+    dataframe["ICT_predicted"] = (dataframe["T_predicted"] + dataframe["I_predicted"] + dataframe["C_predicted"])/3
+    return dataframe
 
 # Retrieving Data from FPL and creating A data Frame from the Data
 r = requests.get("https://fantasy.premierleague.com/api/bootstrap-static/")
@@ -151,20 +163,14 @@ fig.tight_layout()
 plt.show()
 
 # Add new columns showing the predicted points from the creativity, influence or threat
-def_df["C_predicted"] = def_creativity
-def_df["I_predicted"] = def_influence
-def_df["T_predicted"] = def_threat
-def_df["ICT_predicted"] = (def_df["T_predicted"] + def_df["I_predicted"] + def_df["C_predicted"])/3
+def_df = PredictedValuesColumns(def_df, def_creativity, def_influence, def_threat)
+def_df = Per90(def_df)
 
-mid_df["C_predicted"] = mid_creativity
-mid_df["I_predicted"] = mid_influence
-mid_df["T_predicted"] = mid_threat
-mid_df["ICT_predicted"] = (mid_df["T_predicted"] + mid_df["I_predicted"] + mid_df["C_predicted"])/3
+mid_df = PredictedValuesColumns(mid_df, mid_creativity, mid_influence, mid_threat)
+mid_df = Per90(mid_df)
 
-fwd_df["C_predicted"] = fwd_creativity
-fwd_df["I_predicted"] = fwd_influence
-fwd_df["T_predicted"] = fwd_threat
-fwd_df["ICT_predicted"] = (fwd_df["T_predicted"] + fwd_df["I_predicted"] + fwd_df["C_predicted"])/3
+fwd_df = PredictedValuesColumns(fwd_df, fwd_creativity, fwd_influence, fwd_threat)
+fwd_df = Per90(fwd_df)
 
 # Converting Data frame into CSV and saving on top desktop
 fwd_df.to_csv("~/Desktop/fpl_FWD_data.csv")
